@@ -12,7 +12,7 @@ This is ongoing stuff, personnal notes
 - **vmbr0** : 10.12.0.0/24 - Proxmox default
 - No need of an isolated one, we will put some Proxmox firewalls rules on the guests
 
-## VM, LXC and LAN creation
+## Setting up Ubuntu 24 Host
 
 Let's create the Ubuntu LXC (2 CPUs / 4GB RAM / 24GB SSD), on 10.12.0.70.
 
@@ -31,6 +31,13 @@ Then run the ```Base``` installer as ```cape``` user
 ```bash
 sudo ./cape2.sh Base | tee cape-base.log
 ```
+Then you can reboot, and next
+
+```bash
+cd /opt/CAPEv2
+poetry run pip install -U proxmoxer
+poetry run pip install -r extra/optional_dependencies.txt
+```
 
 After quite some waiting, its now time to prepare the ```machinery```.\
 Before that, huge advice to read the ```conf/``` folder
@@ -38,8 +45,22 @@ Before that, huge advice to read the ```conf/``` folder
 ## Setting up Windows 10 Guest
 
 Download the Microsoft official Windows 10 ISO and the virtio drivers ISO [here](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso)\
-Create a VM as usual, I gave mine 2 CPUs / 4GB RAM / 64GB SSD for now, will see later.
+Create a VM as usual, I gave mine 4 CPUs / 8GB RAM / 64GB SSD for now, will see later.  
+Give your VM a unique proxmox Name !!  
 Since the goal is to have a Guest as realistic as possible, don't put Qemu Agent and other fancy stuff on.
+
+For the Windows install, go for the classical with a standard account, saying no to Microsoft fancy question.
+On boot up, set the IP to a static one, I put 10.12.0.71 in my case.  
+We will setup Proxmox firewall in later section.
+
+Check [this](https://www.informatiweb.net/tutoriels/informatique/windows/windows-10-11-ajouter-l-editeur-de-gpo-gpedit-msc-sous-windows-famille.html) to enable ```gpedit.msc``` on Windows 10, we will need it
+
+Now in order for the cape agent to work, we need a 32 bits Python.  
+I recommend to use ```Python 3.12.4```, available [here](https://www.python.org/downloads/release/python-3124/).  
+Reason is some later versions won't have some libs in the default install.
+
+Then, there is quite some nice guides about how to setup a Windows guest (apps to install, noise to remove) you can refer to this link : https://endsec.au/blog/building-an-automated-malware-sandbox-using-cape/  
+Also, CAPE team made some usefull script to disable noise & so, check them in ```installer/```
 
 ## Setting up the Proxmox REST API
 
@@ -63,9 +84,28 @@ Let's now give the User the created role
 Datacenter > Permissions > Add > User Permission
 ![Permission creation](imgs/pve_permissionadd.png)  
 
-Now you can edit the ```conf/proxmox.conf``` accordingly and put your user credentials from step 1 (not the token/secret)
+
 
 If you got lost in the process, or want to check if you're good with this section, feel free to check [this](https://i12bretro.github.io/tutorials/0572.html)
+
+## Config
+
+Let's now dive into ```conf/```
+
+### proxmox.conf
+
+Here you need to put your user credentials from the previous section, in my case username is ```cape@pve``` and the password is the one from the first step.  
+Then you have to define your machines, at least one, in my case the minimum config is:
+```ini
+[win10]
+label = win10
+platform = windows
+ip = 10.12.0.71
+arch = x64
+```
+to continue
+
+Web SSL/TLS setup todo as well
 
 ## Notes
 
