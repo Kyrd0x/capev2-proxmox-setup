@@ -31,7 +31,7 @@ Then run the ```Base``` installer as ```cape``` user
 ```bash
 sudo ./cape2.sh Base | tee cape-base.log
 ```
-Then you can reboot, and next
+Then you can reboot, and install some dependencies
 
 ```bash
 cd /opt/CAPEv2
@@ -39,8 +39,7 @@ poetry run pip install -U proxmoxer
 poetry run pip install -r extra/optional_dependencies.txt
 ```
 
-After quite some waiting, its now time to prepare the ```machinery```.\
-Before that, huge advice to read the ```conf/``` folder
+We will configure CAPE itself later on, let's move the the guest vm.
 
 ## Setting up Windows 10 Guest
 
@@ -105,12 +104,14 @@ arch = x64
 ```
 to continue
 
-Web SSL/TLS setup todo as well
+
 
 ## Notes
 
 Maybe Ubuntu server on LXC is stupid  
 Screenshots of steps when all setup is done
+Proxmox firewall section
+Web SSL/TLS setup todo as well
 
 ## Ressources
 
