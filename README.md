@@ -1,4 +1,4 @@
-# CAPE v2 - Installatio on Proxmox
+# CAPE v2 - Proxmox Installation 2025
 
 This is ongoing stuff, personnal notes
 
@@ -45,7 +45,7 @@ We will configure CAPE itself later on, let's move the the guest vm.
 
 Download the Microsoft official Windows 10 ISO and the virtio drivers ISO [here](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso)\
 Create a VM as usual, I gave mine 4 CPUs / 8GB RAM / 64GB SSD for now, will see later.  
-Give your VM a unique proxmox Name !!  
+Give your VM a unique proxmox Name if you have multiple nodes !!  
 Since the goal is to have a Guest as realistic as possible, don't put Qemu Agent and other fancy stuff on.
 
 For the Windows install, go for the classical with a standard account, saying no to Microsoft fancy question.
@@ -87,31 +87,54 @@ Datacenter > Permissions > Add > User Permission
 
 If you got lost in the process, or want to check if you're good with this section, feel free to check [this](https://i12bretro.github.io/tutorials/0572.html)
 
-## Config
+## Configuration
 
-Let's now dive into ```conf/```
+Let's now dive into ```conf/```, first the mandatory config for our untypical install and then some other additional modules
 
-### proxmox.conf
+### Mandatory config
 
-Here you need to put your user credentials from the previous section, in my case username is ```cape@pve``` and the password is the one from the first step.  
-Then you have to define your machines, at least one, in my case the minimum config is:
+Here you need to put your user credentials from the Proxmox API setup section, in my case username is ```cape@pve``` and the password is the one from the first step of the section.  
+Then you have to define your machines, at least one, the minimum config is
 ```ini
 [win10]
-label = win10
+label = win10-cape
 platform = windows
 ip = 10.12.0.71
 arch = x64
 ```
-to continue
+... to continue
 
+### Modules
 
+ssl/tls  
+trid, guacamole, Geolite, box4js
+
+## SSL/TLS
+
+todo
+
+### Guacamole
+
+Guacamole is a must, it allows you to visualize and interact with the VM during the analysis (like ANYRUN for example).  
+For this to work, you need to install it in the CAPE side, by doing
+
+```bash
+cd installer/
+sudo ./cape2.sh guacamole | tee cape-guacamole.log
+```
+
+Then, we need to do some tricks on the Proxmox side:
+
+todo
+
+Configuration is in ```conf/web.conf```
 
 ## Notes
 
 Maybe Ubuntu server on LXC is stupid  
 Screenshots of steps when all setup is done
-Proxmox firewall section
-Web SSL/TLS setup todo as well
+Proxmox firewall section  
+Web SSL/TLS setup todo as well  
 
 ## Ressources
 
