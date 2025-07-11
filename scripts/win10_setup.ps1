@@ -25,7 +25,7 @@ python -m pip install --upgrade pip
 
 # 4. Installer NumPy
 Write-Output "➕ Installation de NumPy..."
-python -m pip install numpy
+python -m pip install Pillow==9.5.0
 
 Write-Output "✅ Installation de Python et NumPy terminée."
 
