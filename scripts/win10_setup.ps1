@@ -6,56 +6,55 @@
 # Create Ninite from selection of software
 
 # Prerequis :
-# Permissions admin (à tester)
-# Acces internet (à tester)
+# Permissions admin (a tes)
+# Acces internet (a tester)
 # Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
 
 
-Write-Output "🟢 Début du script de configuration Python..."
+Write-Output "Debut du script de configuration Python..."
 
 # 1. Installer Python 3.12.4 32 bits
-Write-Output "📦 Installation de Python 3.12.4 32 bits via winget..."
+Write-Output "Installation de Python 3.12.4 32 bits via winget..."
 winget install --id "Python.Python.3.12" --architecture x86 --version 3.12.4.0 --silent
 
 # Attendre que l'installation se termine
 Start-Sleep -Seconds 10
 
-# 2. Ajouter Python au PATH si ce n'est pas déjà fait
+# 2. Ajouter Python au PATH si ce n'est pas deja fait
 $pythonPath = "$env:LOCALAPPDATA\Programs\Python\Python312-32"
-$env:Path += ";${pythonPath};${pythonPath}\Scripts"
+$env:Path += ";$pythonPath;$pythonPath\Scripts"
 
-
-# 3. Mettre à jour pip
-Write-Output "⬆️ Mise à jour de pip..."
+# 3. Mettre a jour pip
+Write-Output "⬆Mise a jour de pip..."
 python -m ensurepip --upgrade
 python -m pip install --upgrade pip
 
 # 4. Installer Pillow
-Write-Output "➕ Installation de Pillow..."
+Write-Output "Installation de Pillow..."
 python -m pip install Pillow==9.5.0
 
-Write-Output "✅ Installation de Python et NumPy terminée."
+Write-Output "Installation de Python et Pillow terminee."
 
 # 5. --- Setup agent
 
-# 1. Liste d’animaux pour nom discret aléatoire
+# 1. Liste d’animaux pour nom discret aleatoire
 $animals = @(
     "panda", "koala", "tiger", "eagle", "falcon", "otter", "lynx", "panther", "gecko", "wolf",
     "fox", "rabbit", "bear", "orca", "shark", "bat", "owl", "boar", "seal", "lizard"
 )
 
-# 2. Générer un nom aléatoire et définir les chemins
+# 2. Generer un nom aleatoire et definir les chemins
 $randomAnimal = Get-Random -InputObject $animals
 $filename = "$randomAnimal.pyw"
 $downloadFolder = Join-Path $env:USERPROFILE "Downloads"
 $fullPath = Join-Path $downloadFolder $filename
 
-# 3. Télécharger le fichier agent.py depuis GitHub (version raw)
+# 3. Telecharger le fichier agent.py depuis GitHub (version raw)
 $rawUrl = "https://raw.githubusercontent.com/kevoreilly/CAPEv2/master/agent/agent.py"
 Invoke-WebRequest -Uri $rawUrl -OutFile $fullPath
-Write-Output "✅ Fichier téléchargé : $fullPath"
+Write-Output "Fichier telecharge : $fullPath"
 
-# 4. Créer la tâche planifiée
+# 4. Creer la tache planifiee
 $taskName = "Updater_" + $randomAnimal  # nom discret
 $action = New-ScheduledTaskAction -Execute "pythonw.exe" -Argument "`"$fullPath`""
 $trigger = New-ScheduledTaskTrigger -AtLogOn
@@ -69,4 +68,4 @@ Register-ScheduledTask `
     -Description "Discreet task running $filename at logon" `
     -Force
 
-Write-Output "✅ Tâche planifiée '$taskName' créée avec privilèges élevés."
+Write-Output "Tache planifiee '$taskName' creee avec privileges eleves."
