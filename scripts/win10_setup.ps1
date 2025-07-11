@@ -3,10 +3,61 @@
 # Acces internet (a tester)
 # Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
 
+# Ensure running as admin
+If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Error "This script must be run as Administrator"
+    exit
+}
+
+# ================================ DISABLING PROTECTIONS ================================
+Write-Output "Debut de la desactivation des protections..."
 
 # Before
 netsh interface teredo set state disabled
 # gpedit todo
+
+# 1. Turn off LLMNR (multicast name resolution)
+Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" -Name "EnableMulticast" -Value 0 -Type DWord
+
+# 2. Enable "Restrict Internet communication"
+New-Item -Path "HKLM:\Software\Policies\Microsoft\Windows\System" -Force | Out-Null
+Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows\System" -Name "DisableInternetOpenWith" -Value 1 -Type DWord
+Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows\System" -Name "EnableSmartScreen" -Value 0 -Type DWord
+Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows\System" -Name "GroupPolicyRefreshTimeDC" -Value 0 -Type DWord
+
+# 3. Disable Microsoft Defender Antivirus
+New-Item -Path "HKLM:\Software\Policies\Microsoft\Windows Defender" -Force | Out-Null
+Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows Defender" -Name "DisableAntiSpyware" -Value 1 -Type DWord
+
+# 4. Disable Real-time Protection
+New-Item -Path "HKLM:\Software\Policies\Microsoft\Windows Defender\Real-Time Protection" -Force | Out-Null
+Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows Defender\Real-Time Protection" -Name "DisableRealtimeMonitoring" -Value 1 -Type DWord
+
+# 5. Disable Microsoft Store
+New-Item -Path "HKLM:\Software\Policies\Microsoft\WindowsStore" -Force | Out-Null
+Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\WindowsStore" -Name "RemoveWindowsStore" -Value 1 -Type DWord
+
+# Disable Defender real-time protection
+Set-MpPreference -DisableRealtimeMonitoring $true
+Set-MpPreference -DisableIOAVProtection $true
+Set-MpPreference -DisableBehaviorMonitoring $true
+Set-MpPreference -DisableScriptScanning $true
+
+# Disable Cloud-delivered protection
+Set-MpPreference -MAPSReporting 0
+Set-MpPreference -SubmitSamplesConsent 2
+
+# Disable Automatic sample submission
+Set-MpPreference -SubmitSamplesConsent 2
+
+# Disable Ransomware protection (Controlled Folder Access)
+Set-MpPreference -EnableControlledFolderAccess Disabled
+
+# Disable Defender antivirus (legacy; might not fully disable on recent builds)
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableAntiSpyware" -Value 1 -Type DWord
+
+# Disable Firewall for all profiles (Domain, Private, Public)
+Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled False
 
 # ================================ SYSMON INSTALLATION ================================
 Write-Output "Debut de l'installation de Sysmon..."
@@ -52,7 +103,7 @@ Start-Process -FilePath $sysmonExe -ArgumentList "-accepteula -i `"$configPath`"
 # Clean up downloaded files
 Remove-Item -Path $config_fullPath, $sysmonZipPath, $sysmonExtractPath -Recurse -Force
 
-# ===============================
+# =============================== PYTHON & AGENT INSTALLATION ================================
 
 Write-Output "Debut du script de configuration Python..."
 
@@ -120,7 +171,6 @@ Register-ScheduledTask `
     -Action $action `
     -Trigger $trigger `
     -Principal $principal `
-    -Description "Discreet task running $filename at logon" `
     -Force
 
 Write-Output "Tache planifiee '$taskName' creee avec privileges eleves."
