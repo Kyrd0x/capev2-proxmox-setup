@@ -11,6 +11,31 @@
 # Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
 
 
+# Prerequis :
+# Permissions admin (a tester)
+# Acces internet (a tester)
+# Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
+
+
+# Before
+netsh interface teredo set state disabled
+# gpedit todo
+
+# Sysmon
+$rawUrl = "https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-config/master/sysmonconfig-export.xml"
+$downloadFolder = Join-Path $env:USERPROFILE "Downloads"
+$filename = "sysmonconfig-export.xml"
+$fullPath = Join-Path $downloadFolder $filename
+Invoke-WebRequest -Uri $rawUrl -OutFile $fullPath
+Write-Output "Fichier de configuration Sysmon telecharge : $fullPath"
+winget install --id Sysinternals.Sysmon --scope machine --silent
+# Attendre que l'installation se termine
+Start-Sleep -Seconds 5
+# Configurer Sysmon avec le fichier de configuration telecharge
+Write-Output "Configuration de Sysmon avec le fichier $fullPath..."
+& "C:\Program Files\Sysinternals\Sysmon64.exe" -accepteula -i $fullPath
+
+
 Write-Output "Debut du script de configuration Python..."
 
 # 1. Installer Python 3.12.4 32 bits
@@ -20,10 +45,20 @@ winget install --id Python.Python.3.12 --architecture x86 --version 3.12.4 --sco
 # Attendre que l'installation se termine
 Start-Sleep -Seconds 10
 
-# 2. Ajouter Python au PATH si ce n'est pas deja fait
-$pythonPath = "$env:LOCALAPPDATA\Programs\Python\Python312-32"
-$env:Path += ";$pythonPath;$pythonPath\Scripts"
+# Définir le chemin d'installation par défaut pour 32-bit installé pour tous les utilisateurs
+$pythonPath = "C:\Program Files (x86)\Python312-32"
+
+# Vérifier que Python est installé
 $pythonExe = Join-Path $pythonPath "python.exe"
+if (Test-Path $pythonExe) {
+    Write-Output "Python a été installé avec succès."
+
+    # Ajouter Python au PATH pour la session en cours
+    $env:Path += ";$pythonPath;$pythonPath\Scripts"
+    Write-Output "Chemins ajoutés au PATH pour cette session : $pythonPath"
+} else {
+    Write-Error "L'installation de Python a échoué ou le chemin est incorrect."
+}
 
 # 3. Mettre à jour pip
 Write-Output "Mise à jour de pip..."
@@ -71,3 +106,5 @@ Register-ScheduledTask `
     -Force
 
 Write-Output "Tache planifiee '$taskName' creee avec privileges eleves."
+
+# Clean files todo
