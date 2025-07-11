@@ -1,0 +1,66 @@
+# VMX template for sandbox evasion / VM disguise
+# Done for 4C/4T Computer imitation (I3-9100 | HP ProDesk 400 G6 SFF)
+# Problem left : BIOS (need access to ESXi host)
+# Alternative is smbios.reflectHost = "TRUE" in order to hide "VMWare" but Server is visble (e.g. Dell PowerEdge)
+# Some more improvements todo still (Ethernet Adapter, etc.)
+
+# Emulate a physical computer
+cpuid.coresPerSocket = "4"
+numvcpus = "4"
+memsize = "16384"
+guestOS = "windows10-64"
+
+# Disable VMware Tools integration and related APIs
+isolation.tools.setGUIOptions.enable = "FALSE"
+isolation.tools.copy.disable = "TRUE"
+isolation.tools.paste.disable = "TRUE"
+isolation.tools.diskShrink.disable = "TRUE"
+isolation.tools.diskWiper.disable = "TRUE"
+isolation.tools.getCreds.disable = "TRUE"
+isolation.tools.hgfs.disable = "TRUE"
+isolation.tools.unity.disable = "TRUE"
+isolation.tools.unityInterlockOperation.disable = "TRUE"
+tools.remindInstall = "FALSE"
+
+# Hide CPUID flags that indicate a virtualized environment
+monitor_control.restrict_backdoor = "TRUE"
+monitor_control.disable_directexec = "TRUE"
+monitor_control.disable_stats = "TRUE"
+monitor_control.disable_chksimd = "TRUE"
+hypervisor.cpuid.v0 = "FALSE"
+cpuid.1.ecx = "----------0-----------------------"
+cpuid.1.edx = "-----------------------0--------"
+
+# Prevent time synchronization with the host (which could expose VM behavior)
+time.synchronize.allow = "FALSE"
+time.synchronize.tools.enable = "FALSE"
+time.synchronize.resume.disk = "FALSE"
+time.synchronize.resume.host = "FALSE"
+time.synchronize.continue = "FALSE"
+time.synchronize.tools.startup = "FALSE"
+
+# Mask BIOS/DMI info (only works if smbios.reflectHost is FALSE)
+smbios.reflectHost = "TRUE"
+# The following overrides are ignored when reflectHost is enabled
+SMBIOS.override.manufacturer = "HP"
+SMBIOS.override.product = "HP ProDesk 400 G6 SFF"
+SMBIOS.override.version = "1.0"
+SMBIOS.override.vendor = "HP"
+SMBIOS.noOEMStrings = "TRUE"
+SMBIOS.use12CharProductName = "TRUE"
+
+# Replace CPU brand string with physical Intel CPU
+cpuid.brandstring = "Intel(R) Core(TM) i3-9100 CPU @ 3.60GHz"
+
+# Remove common VMware-specific devices
+pciBridge0.present = "FALSE"
+usb_xhci.present = "FALSE"
+vmci0.present = "FALSE"
+
+# Disable generation of migration logs and preserve VM UUID
+uuid.action = "keep"
+nvram = "template.nvram"
+
+# Additional isolation from host interaction
+isolation.device.connectable.disable = "TRUE"
+isolation.device.edit.disable = "TRUE"
