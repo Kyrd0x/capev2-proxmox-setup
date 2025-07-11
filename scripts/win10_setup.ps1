@@ -5,6 +5,12 @@
 # Install : Python 32bits 3.12.4 + upgrade pip + install Pillow / pywintrace
 # Create Ninite from selection of software
 
+# Prerequis :
+# Permissions admin (à tester)
+# Acces internet (à tester)
+# Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
+
+
 Write-Output "🟢 Début du script de configuration Python..."
 
 # 1. Installer Python 3.12.4 32 bits
@@ -16,15 +22,16 @@ Start-Sleep -Seconds 10
 
 # 2. Ajouter Python au PATH si ce n'est pas déjà fait
 $pythonPath = "$env:LOCALAPPDATA\Programs\Python\Python312-32"
-$env:Path += ";$pythonPath;$pythonPath\Scripts"
+$env:Path += ";${pythonPath};${pythonPath}\Scripts"
+
 
 # 3. Mettre à jour pip
 Write-Output "⬆️ Mise à jour de pip..."
 python -m ensurepip --upgrade
 python -m pip install --upgrade pip
 
-# 4. Installer NumPy
-Write-Output "➕ Installation de NumPy..."
+# 4. Installer Pillow
+Write-Output "➕ Installation de Pillow..."
 python -m pip install Pillow==9.5.0
 
 Write-Output "✅ Installation de Python et NumPy terminée."
