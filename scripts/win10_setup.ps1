@@ -6,7 +6,7 @@
 # Create Ninite from selection of software
 
 # Prerequis :
-# Permissions admin (a tes)
+# Permissions admin (a tester)
 # Acces internet (a tester)
 # Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
 
@@ -15,7 +15,7 @@ Write-Output "Debut du script de configuration Python..."
 
 # 1. Installer Python 3.12.4 32 bits
 Write-Output "Installation de Python 3.12.4 32 bits via winget..."
-winget install --id Python.Python.3.12 --architecture x86 --version 3.12.4 --silent
+winget install --id Python.Python.3.12 --architecture x86 --version 3.12.4 --scope machine --silent
 
 # Attendre que l'installation se termine
 Start-Sleep -Seconds 10
@@ -25,12 +25,12 @@ $pythonPath = "$env:LOCALAPPDATA\Programs\Python\Python312-32"
 $env:Path += ";$pythonPath;$pythonPath\Scripts"
 
 # 3. Mettre a jour pip
-Write-Output "⬆Mise a jour de pip..."
+Write-Output "Mise a jour de pip..."
 python -m ensurepip --upgrade
 python -m pip install --upgrade pip
 
 # 4. Installer Pillow
-Write-Output "Installation de Pillow..."
+Write-Output "Installation de Pillow & pywintrace..."
 python -m pip install Pillow==9.5.0
 python -m pip install pywintrace
 
