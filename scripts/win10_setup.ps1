@@ -16,8 +16,21 @@ Write-Output "Debut de la desactivation des protections..."
 netsh interface teredo set state disabled
 # gpedit todo
 
-# 1. Turn off LLMNR (multicast name resolution)
-Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" -Name "EnableMulticast" -Value 0 -Type DWord
+# 1. Turn off LLMNR (multicast name resolution) via registry
+try {
+    # Ensure the registry path exists
+    if (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient")) {
+        New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" -Force | Out-Null
+    }
+    
+    # Set the registry value to disable LLMNR
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" -Name "EnableMulticast" -Value 0 -Type DWord
+    
+    Write-Host "LLMNR disabled successfully" -ForegroundColor Green
+}
+catch {
+    Write-Host "Failed to disable LLMNR: $($_.Exception.Message)" -ForegroundColor Red
+}
 
 # 2. Enable "Restrict Internet communication"
 New-Item -Path "HKLM:\Software\Policies\Microsoft\Windows\System" -Force | Out-Null
