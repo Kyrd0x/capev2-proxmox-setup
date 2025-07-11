@@ -1,23 +1,3 @@
-# Summary
-# Context : Windows 10 fresh install, NETWORK WORKING
-# Pre checks : admin rights, network connection OK
-# Disable : Defender / Firewall / Updates
-# Install : Python 32bits 3.12.4 + upgrade pip + install Pillow / pywintrace
-# Create Ninite from selection of software
-
-# Summary
-# Context : Windows 10 fresh install, NETWORK WORKING
-# Pre checks : admin rights, network connection OK
-# Disable : Defender / Firewall / Updates
-# Install : Python 32bits 3.12.4 + upgrade pip + install Pillow / pywintrace
-# Create Ninite from selection of software
-
-# Prerequis :
-# Permissions admin (a tester)
-# Acces internet (a tester)
-# Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
-
-
 # Prerequis :
 # Permissions admin (a tester)
 # Acces internet (a tester)
@@ -28,20 +8,51 @@
 netsh interface teredo set state disabled
 # gpedit todo
 
-# Sysmon
-$rawUrl = "https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-config/master/sysmonconfig-export.xml"
+# ================================ SYSMON INSTALLATION ================================
+Write-Output "Debut de l'installation de Sysmon..."
+# Set folders
 $downloadFolder = Join-Path $env:USERPROFILE "Downloads"
-$filename = "sysmonconfig-export.xml"
-$fullPath = Join-Path $downloadFolder $filename
-Invoke-WebRequest -Uri $rawUrl -OutFile $fullPath
-Write-Output "Fichier de configuration Sysmon telecharge : $fullPath"
-winget install --id Sysinternals.Sysmon --scope machine --silent
-# Attendre que l'installation se termine
-Start-Sleep -Seconds 5
-# Configurer Sysmon avec le fichier de configuration telecharge
-Write-Output "Configuration de Sysmon avec le fichier $fullPath..."
-& "C:\Program Files\Sysinternals\Sysmon64.exe" -accepteula -i $fullPath
+$sysmonInstallPath = "C:\Program Files\Sysmon"
 
+# URLs and filenames
+$rawUrl_config_file = "https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-config/master/sysmonconfig-export.xml"
+$config_filename = "sysmonconfig-export.xml"
+$rawUrl_sysmon = "https://download.sysinternals.com/files/Sysmon.zip"
+$sysmon_filename = "Sysmon.zip"
+
+# Paths
+$config_fullPath = Join-Path $downloadFolder $config_filename
+$sysmonZipPath = Join-Path $downloadFolder $sysmon_filename
+$sysmonExtractPath = Join-Path $downloadFolder "SysmonExtracted"
+
+# Download config
+Invoke-WebRequest -Uri $rawUrl_config_file -OutFile $config_fullPath
+
+# Download Sysmon zip
+Invoke-WebRequest -Uri $rawUrl_sysmon -OutFile $sysmonZipPath
+
+# Extract Sysmon
+New-Item -ItemType Directory -Force -Path $sysmonExtractPath | Out-Null
+Expand-Archive -Path $sysmonZipPath -DestinationPath $sysmonExtractPath -Force
+
+# Create target folder in Program Files
+New-Item -ItemType Directory -Force -Path $sysmonInstallPath | Out-Null
+
+# Move Sysmon64.exe to Program Files
+Copy-Item -Path (Join-Path $sysmonExtractPath "Sysmon64.exe") -Destination $sysmonInstallPath -Force
+
+# Optionally copy the config file too (for reference or re-install)
+Copy-Item -Path $config_fullPath -Destination $sysmonInstallPath -Force
+
+# Install Sysmon service
+$sysmonExe = Join-Path $sysmonInstallPath "Sysmon64.exe"
+$configPath = Join-Path $sysmonInstallPath $config_filename
+Start-Process -FilePath $sysmonExe -ArgumentList "-accepteula -i `"$configPath`"" -Verb RunAs -Wait
+
+# Clean up downloaded files
+Remove-Item -Path $config_fullPath, $sysmonZipPath, $sysmonExtractPath -Recurse -Force
+
+# ===============================
 
 Write-Output "Debut du script de configuration Python..."
 
