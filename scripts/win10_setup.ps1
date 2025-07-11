@@ -23,18 +23,19 @@ Start-Sleep -Seconds 10
 # 2. Ajouter Python au PATH si ce n'est pas deja fait
 $pythonPath = "$env:LOCALAPPDATA\Programs\Python\Python312-32"
 $env:Path += ";$pythonPath;$pythonPath\Scripts"
+$pythonExe = Join-Path $pythonPath "python.exe"
 
-# 3. Mettre a jour pip
-Write-Output "Mise a jour de pip..."
-python -m ensurepip --upgrade
-python -m pip install --upgrade pip
+# 3. Mettre à jour pip
+Write-Output "Mise à jour de pip..."
+& $pythonExe -m ensurepip --upgrade
+& $pythonExe -m pip install --upgrade pip
 
 # 4. Installer Pillow
-Write-Output "Installation de Pillow & pywintrace..."
-python -m pip install Pillow==9.5.0
-python -m pip install pywintrace
+Write-Output "Installation de Pillow & pywintrace ..."
+& $pythonExe -m pip install Pillow==9.5.0
+& $pythonExe -m pip install pywintrace
 
-Write-Output "Installation de Python et Pillow terminee."
+Write-Output "Installation de Python et des modules terminee."
 
 # 5. --- Setup agent
 
