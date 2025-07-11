@@ -15,7 +15,7 @@ Write-Output "Debut du script de configuration Python..."
 
 # 1. Installer Python 3.12.4 32 bits
 Write-Output "Installation de Python 3.12.4 32 bits via winget..."
-winget install --id "Python.Python.3.12" --architecture x86 --version 3.12.4.0 --silent
+winget install --id Python.Python.3.12 --architecture x86 --version 3.12.4 --silent
 
 # Attendre que l'installation se termine
 Start-Sleep -Seconds 10
@@ -32,6 +32,7 @@ python -m pip install --upgrade pip
 # 4. Installer Pillow
 Write-Output "Installation de Pillow..."
 python -m pip install Pillow==9.5.0
+python -m pip install pywintrace
 
 Write-Output "Installation de Python et Pillow terminee."
 
