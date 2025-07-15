@@ -159,18 +159,10 @@ Remove-Item -Path $config_fullPath, $sysmonZipPath, $sysmonExtractPath -Recurse 
 # === WINGET INSTALLATION (if needed) ===
 # Verifie si winget est installe
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-    Write-Output "Winget n'est pas installe. Telechargement du script winget-install.ps1..."
+    Write-Output "Winget n'est pas installe. Installation via winget-install.ps1..."
 
-    # Telecharger le script winget-install
-    $wingetInstallScript = "$env:TEMP\winget-install.ps1"
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/asheroto/winget-install/master/winget-install.ps1" -OutFile $wingetInstallScript
-
-    # Lancer le script
-    Write-Output "Installation de winget en cours..."
-    powershell.exe -ExecutionPolicy Bypass -File $wingetInstallScript
-
-    # Supprimer le script apres installation (facultatif)
-    Remove-Item $wingetInstallScript -Force
+    # https://github.com/asheroto/winget-install
+    Install-Script winget-install -Force
 
     Write-Output "Winget a ete installe avec succes via script externe."
 } else {
