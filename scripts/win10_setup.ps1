@@ -157,35 +157,29 @@ Start-Process -FilePath $sysmonExe -ArgumentList "-accepteula -i `"$configPath`"
 Remove-Item -Path $config_fullPath, $sysmonZipPath, $sysmonExtractPath -Recurse -Force
 
 # === WINGET INSTALLATION (if needed) ===
+# Verifie si winget est installe
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-    Write-Output "Winget n'est pas installé. Téléchargement et installation en cours..."
+    Write-Output "Winget n'est pas installe. Telechargement du script winget-install.ps1..."
 
-    # Fetch the latest release info from GitHub API
-    $latestRelease = Invoke-RestMethod -Uri "https://api.github.com/repos/microsoft/winget-cli/releases/latest"
+    # Telecharger le script winget-install
+    $wingetInstallScript = "$env:TEMP\winget-install.ps1"
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/asheroto/winget-install/master/winget-install.ps1" -OutFile $wingetInstallScript
 
-    # Extract the latest .msixbundle URL
-    $msixUrl = $latestRelease.assets | Where-Object { $_.name -like "*.msixbundle" } | Select-Object -ExpandProperty browser_download_url
+    # Lancer le script
+    Write-Output "Installation de winget en cours..."
+    powershell.exe -ExecutionPolicy Bypass -File $wingetInstallScript
 
-    # Output the URL (optional for debugging)
-    Write-Output "Latest winget MSIX URL: $msixUrl"
+    # Supprimer le script apres installation (facultatif)
+    Remove-Item $wingetInstallScript -Force
 
-    # Download the file
-    Invoke-WebRequest -Uri $msixUrl -OutFile ".\MicrosoftDesktopAppInstaller.msixbundle"
-
-    # Install the package
-    Add-AppxPackage -Path ".\MicrosoftDesktopAppInstaller.msixbundle"
-
-    # Cleanup
-    Remove-Item ".\MicrosoftDesktopAppInstaller.msixbundle"
-
-    Write-Output "Winget a été installé avec succès."
+    Write-Output "Winget a ete installe avec succes via script externe."
 } else {
-    Write-Output "Winget est déjà installé. Étape ignorée."
+    Write-Output "Winget est dejà installe. Etape ignoree."
 }
 
 # =============================== PYTHON & AGENT INSTALLATION ================================
 
-Write-Output "Début du script de configuration Python..."
+Write-Output "Debut du script de configuration Python..."
 
 # Installer Python 3.12.4 32 bits via winget
 Write-Output "Installation de Python 3.12.4 32 bits via winget..."
@@ -194,24 +188,24 @@ winget install --id Python.Python.3.12 --architecture x86 --version 3.12.4 --sco
 # Attendre que l'installation se termine
 Start-Sleep -Seconds 10
 
-# Définir le chemin d'installation par défaut pour 32-bit installé pour tous les utilisateurs
+# Definir le chemin d'installation par defaut pour 32-bit installe pour tous les utilisateurs
 $pythonPath = "C:\Program Files (x86)\Python312-32"
 
-# Vérifier que Python est installé
+# Verifier que Python est installe
 $pythonExe = Join-Path $pythonPath "python.exe"
 if (Test-Path $pythonExe) {
-    Write-Output "Python a été installé avec succès."
+    Write-Output "Python a ete installe avec succes."
 
     # Ajouter Python au PATH pour la session en cours
     $env:Path += ";$pythonPath;$pythonPath\Scripts"
-    Write-Output "Chemins ajoutés au PATH pour cette session : $pythonPath"
+    Write-Output "Chemins ajoutes au PATH pour cette session : $pythonPath"
 } else {
-    Write-Error "L'installation de Python a échoué ou le chemin est incorrect."
+    Write-Error "L'installation de Python a echoue ou le chemin est incorrect."
 }
 
 
-# 3. Mettre à jour pip
-Write-Output "Mise à jour de pip..."
+# 3. Mettre a jour pip
+Write-Output "Mise a jour de pip..."
 & $pythonExe -m ensurepip --upgrade
 & $pythonExe -m pip install --upgrade pip
 
