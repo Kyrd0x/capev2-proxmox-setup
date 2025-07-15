@@ -160,20 +160,23 @@ Remove-Item -Path $config_fullPath, $sysmonZipPath, $sysmonExtractPath -Recurse 
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     Write-Output "Winget n'est pas installé. Téléchargement et installation en cours..."
 
-    $URL = "https://api.github.com/repos/microsoft/winget-cli/releases/latest"
-    $URL = (Invoke-WebRequest -Uri $URL).Content | ConvertFrom-Json |
-            Select-Object -ExpandProperty "assets" |
-            Where-Object "browser_download_url" -Match '.msixbundle' |
-            Select-Object -ExpandProperty "browser_download_url"
+    # Fetch the latest release info from GitHub API
+    $latestRelease = Invoke-RestMethod -Uri "https://api.github.com/repos/microsoft/winget-cli/releases/latest"
 
-    # Télécharger le fichier .msixbundle
-    Invoke-WebRequest -Uri $URL -OutFile "Setup.msix" -UseBasicParsing
+    # Extract the latest .msixbundle URL
+    $msixUrl = $latestRelease.assets | Where-Object { $_.name -like "*.msixbundle" } | Select-Object -ExpandProperty browser_download_url
 
-    # Installer winget
-    Add-AppxPackage -Path "Setup.msix"
+    # Output the URL (optional for debugging)
+    Write-Output "Latest winget MSIX URL: $msixUrl"
 
-    # Nettoyage
-    Remove-Item "Setup.msix"
+    # Download the file
+    Invoke-WebRequest -Uri $msixUrl -OutFile ".\MicrosoftDesktopAppInstaller.msixbundle"
+
+    # Install the package
+    Add-AppxPackage -Path ".\MicrosoftDesktopAppInstaller.msixbundle"
+
+    # Cleanup
+    Remove-Item ".\MicrosoftDesktopAppInstaller.msixbundle"
 
     Write-Output "Winget a été installé avec succès."
 } else {
