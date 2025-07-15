@@ -156,11 +156,35 @@ Start-Process -FilePath $sysmonExe -ArgumentList "-accepteula -i `"$configPath`"
 # Clean up downloaded files
 Remove-Item -Path $config_fullPath, $sysmonZipPath, $sysmonExtractPath -Recurse -Force
 
+# === WINGET INSTALLATION (if needed) ===
+if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+    Write-Output "Winget n'est pas installé. Téléchargement et installation en cours..."
+
+    $URL = "https://api.github.com/repos/microsoft/winget-cli/releases/latest"
+    $URL = (Invoke-WebRequest -Uri $URL).Content | ConvertFrom-Json |
+            Select-Object -ExpandProperty "assets" |
+            Where-Object "browser_download_url" -Match '.msixbundle' |
+            Select-Object -ExpandProperty "browser_download_url"
+
+    # Télécharger le fichier .msixbundle
+    Invoke-WebRequest -Uri $URL -OutFile "Setup.msix" -UseBasicParsing
+
+    # Installer winget
+    Add-AppxPackage -Path "Setup.msix"
+
+    # Nettoyage
+    Remove-Item "Setup.msix"
+
+    Write-Output "Winget a été installé avec succès."
+} else {
+    Write-Output "Winget est déjà installé. Étape ignorée."
+}
+
 # =============================== PYTHON & AGENT INSTALLATION ================================
 
-Write-Output "Debut du script de configuration Python..."
+Write-Output "Début du script de configuration Python..."
 
-# 1. Installer Python 3.12.4 32 bits
+# Installer Python 3.12.4 32 bits via winget
 Write-Output "Installation de Python 3.12.4 32 bits via winget..."
 winget install --id Python.Python.3.12 --architecture x86 --version 3.12.4 --scope machine --silent
 
@@ -182,6 +206,7 @@ if (Test-Path $pythonExe) {
     Write-Error "L'installation de Python a échoué ou le chemin est incorrect."
 }
 
+
 # 3. Mettre à jour pip
 Write-Output "Mise à jour de pip..."
 & $pythonExe -m ensurepip --upgrade
@@ -189,7 +214,7 @@ Write-Output "Mise à jour de pip..."
 
 # 4. Installer Pillow
 Write-Output "Installation de Pillow & pywintrace ..."
-& $pythonExe -m pip install Pillow==9.5.0
+& $pythonExe -m pip install Pillow==11.1.0
 & $pythonExe -m pip install pywintrace
 
 Write-Output "Installation de Python et des modules terminee."
@@ -229,3 +254,20 @@ Register-ScheduledTask `
 Write-Output "Tache planifiee '$taskName' creee avec privileges eleves."
 
 # Clean files todo
+
+# ----- VM MASKING -----
+
+Write-Output "Debut de la desactivation des services VMware..."
+# Stop VMware services to prevent detection
+Get-Service | Where-Object {$_.Name -like "*vmic*"} | Stop-Service -Force # to confirm
+
+# ----- ENABLING RDP -----
+
+# Write-Output "Activation de RDP..."
+# # Enable Remote Desktop
+# Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections' -Value 0
+
+# # Optional: Restart RDP service to apply changes (use with caution on production)
+# Restart-Service -Name TermService -Force
+
+# -----
