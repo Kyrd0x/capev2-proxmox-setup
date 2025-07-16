@@ -204,7 +204,7 @@ Write-Output "Mise a jour de pip..."
 
 # 4. Installer modules
 Write-Output "Installation de Pillow & pywintrace & pywin32 ..."
-& $pythonExe -m pip install Pillow==11.1.0
+& $pythonExe -m pip install Pillow==9.5.0
 & $pythonExe -m pip install pywintrace
 & $pythonExe -m pip install pywin32
 
