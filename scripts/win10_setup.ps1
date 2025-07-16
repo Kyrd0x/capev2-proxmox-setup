@@ -261,4 +261,44 @@ Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\W
 Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'LimitBlankPasswordUse' -Value 0
 Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'LimitBlankPasswordUse' -Value 0
 
-# -----
+
+
+# ---- SETUP SOFTWARE ----
+
+# Installation des outils via Ninite
+Write-Output "Debut de l'installation des outils via Ninite..."
+
+# Liste des outils à installer via Ninite
+# 7zip-brave-chrome-dropbox-edge-filezilla-firefox-git-keepass2-notepadplusplus-operaChromium-teamviewer15-vlc-zoom
+$apps = @(
+    # Browsers
+    "brave",
+    "chrome",
+    "edge",
+    "firefox",
+    "operaChromium",
+    # Utilities
+    "notepadplusplus",
+    "filezilla",
+    "7zip",
+    "git",
+    "putty",
+    "vlc",
+    "zoom",
+    "teamviewer15",
+    "dropbox"
+)
+
+# Génération de l'URL Ninite à partir de la liste
+$baseUrl = "https://ninite.com/"
+$appString = ($apps -join "-")
+$niniteUrl = "$baseUrl$appString/ninite.exe"
+
+# Téléchargement et exécution de l'installeur
+$niniteInstaller = "$env:TEMP\ninite.exe"
+Invoke-WebRequest -Uri $niniteUrl -OutFile $niniteInstaller
+Start-Process -FilePath $niniteInstaller -Wait
+
+# ---- INSTALLATION COMPLETE ----
+Write-Output "Configuration de Windows 10 terminee avec succes."
+Write-Output "Veuillez redemarrer votre machine pour appliquer les changements."
