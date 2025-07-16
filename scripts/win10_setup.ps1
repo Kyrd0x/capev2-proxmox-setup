@@ -3,6 +3,7 @@
 # Acces internet (a tester)
 # Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
 
+# todo: enable machinery as argument, default kvm
 
 # VMWare :
 # https://web.archive.org/web/20200222145558/http://vknowledge.net/2014/04/17/how-to-fake-a-vms-guest-os-cpuid/
@@ -12,16 +13,16 @@
 
 # Ensure running as admin
 If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Error "This script must be run as Administrator"
+    Write-Error "This script must be run with elevated privileges."
     exit
 }
 
 # ================================ DISABLING PROTECTIONS ================================
-Write-Output "Debut de la desactivation des protections..."
+
+Write-Output "Disabling protections..."
 
 # Before
 netsh interface teredo set state disabled
-# gpedit todo
 
 # 1. Turn off LLMNR (multicast name resolution) via registry
 try {
@@ -114,7 +115,8 @@ Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Nam
 Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled False
 
 # ================================ SYSMON INSTALLATION ================================
-Write-Output "Debut de l'installation de Sysmon..."
+
+Write-Output "Beginning Sysmon installation..."
 # Set folders
 $downloadFolder = Join-Path $env:USERPROFILE "Downloads"
 $sysmonInstallPath = "C:\Program Files\Sysmon"
@@ -158,78 +160,77 @@ Start-Process -FilePath $sysmonExe -ArgumentList "-accepteula -i `"$configPath`"
 Remove-Item -Path $config_fullPath, $sysmonZipPath, $sysmonExtractPath -Recurse -Force
 
 # === WINGET INSTALLATION (if needed) ===
-# Verifie si winget est installe
+
+# Check if winget is installed
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-    Write-Output "Winget n'est pas installe. Installation via winget-install.ps1..."
+    Write-Output "Winget is not installed. Installing via winget-install.ps1..."
 
     # https://github.com/asheroto/winget-install
     Install-Script winget-install -Force
 
-    Write-Output "Winget a ete installe avec succes via script externe."
+    Write-Output "Winget has been successfully installed via external script."
 } else {
-    Write-Output "Winget est dejà installe. Etape ignoree."
+    Write-Output "Winget is already installed. Skipping step."
 }
 
 # =============================== PYTHON & AGENT INSTALLATION ================================
 
-Write-Output "Debut du script de configuration Python..."
+Write-Output "Starting Python configuration script..."
 
-# Installer Python 3.12.4 32 bits via winget
-Write-Output "Installation de Python 3.12.4 32 bits via winget..."
+# Install Python 3.12.4 32-bit via winget
+Write-Output "Installing Python 3.12.4 32-bit via winget..."
 winget install --id Python.Python.3.12 --architecture x86 --version 3.12.4 --scope machine --silent
 
-# Attendre que l'installation se termine
+# Wait for install to finish
 Start-Sleep -Seconds 10
 
-# Definir le chemin d'installation par defaut pour 32-bit installe pour tous les utilisateurs
+# Define Python installation paths
 $pythonPath = "C:\Program Files (x86)\Python312-32"
 
-# Verifier que Python est installe
+# Verify that Python is installed
 $pythonExe = Join-Path $pythonPath "python.exe"
 if (Test-Path $pythonExe) {
-    Write-Output "Python a ete installe avec succes."
+    Write-Output "Python was installed successfully."
 
-    # Ajouter Python au PATH pour la session en cours
-    $env:Path += ";$pythonPath;$pythonPath\Scripts"
-    Write-Output "Chemins ajoutes au PATH pour cette session : $pythonPath"
+    # Add Python to PATH for current session
+    Write-Output "Paths added to PATH for this session: $pythonPath"
 } else {
-    Write-Error "L'installation de Python a echoue ou le chemin est incorrect."
+    Write-Error "Python installation failed or path is incorrect."
 }
 
-
-# 3. Mettre a jour pip
-Write-Output "Mise a jour de pip..."
+# 3. Update pip
+Write-Output "Updating pip..."
 & $pythonExe -m ensurepip --upgrade
 & $pythonExe -m pip install --upgrade pip
 
-# 4. Installer modules
-Write-Output "Installation de Pillow & pywintrace & pywin32 ..."
+# 4. Install modules
+Write-Output "Installing Pillow & pywintrace & pywin32 ..."
 & $pythonExe -m pip install Pillow==9.5.0
 & $pythonExe -m pip install pywintrace
 & $pythonExe -m pip install pywin32
 
-Write-Output "Installation de Python et des modules terminee."
+ 1. List of animals for discrete random name
 
 # 5. --- Setup agent
 
-# 1. Liste d’animaux pour nom discret aleatoire
+#  1. List of animals for discrete random name
 $animals = @(
     "panda", "koala", "tiger", "eagle", "falcon", "otter", "lynx", "panther", "gecko", "wolf",
     "fox", "rabbit", "bear", "orca", "shark", "bat", "owl", "boar", "seal", "lizard"
 )
 
-# 2. Generer un nom aleatoire et definir les chemins
+# 2. Generate a random animal name and create a filename
 $randomAnimal = Get-Random -InputObject $animals
 $filename = "$randomAnimal.pyw"
 $downloadFolder = Join-Path $env:USERPROFILE "Downloads"
 $fullPath = Join-Path $downloadFolder $filename
 
-# 3. Telecharger le fichier agent.py depuis GitHub (version raw)
+# 3. Download agent.py file from GitHub (raw version)
 $rawUrl = "https://raw.githubusercontent.com/kevoreilly/CAPEv2/master/agent/agent.py"
 Invoke-WebRequest -Uri $rawUrl -OutFile $fullPath
-Write-Output "Fichier telecharge : $fullPath"
+Write-Output "File downloaded: $fullPath"
 
-# 4. Creer la tache planifiee
+# 4. Create scheduled task
 $taskName = "Updater_" + $randomAnimal  # nom discret
 $action = New-ScheduledTaskAction -Execute "pythonw.exe" -Argument "`"$fullPath`""
 $trigger = New-ScheduledTaskTrigger -AtLogOn
@@ -242,35 +243,30 @@ Register-ScheduledTask `
     -Principal $principal `
     -Force
 
-Write-Output "Tache planifiee '$taskName' creee avec privileges eleves."
+Write-Output "Scheduled task '$taskName' created with elevated privileges."
 
 # Clean files todo
 
 # ----- VM MASKING -----
 
-Write-Output "Debut de la desactivation des services VMware..."
-# Stop VMware services to prevent detection
+Write-Output "Starting VM service deactivation..."
 Get-Service | Where-Object {$_.Name -like "*vmic*"} | Stop-Service -Force # to confirm
 
 # ----- ENABLING RDP -----
 
-# Write-Output "Activation de RDP..."
-# Enable Remote Desktop without password
+# Write-Output "Enabling RDP..."
 
 Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
 Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
 Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'LimitBlankPasswordUse' -Value 0
 Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'LimitBlankPasswordUse' -Value 0
 
-
-
 # ---- SETUP SOFTWARE ----
 
-# Installation des outils via Ninite
-Write-Output "Debut de l'installation des outils via Ninite..."
+# Install tools via Ninite
+Write-Output "Starting tool installation via Ninite..."
 
-# Liste des outils à installer via Ninite
-# 7zip-brave-chrome-dropbox-edge-filezilla-firefox-git-keepass2-notepadplusplus-operaChromium-teamviewer15-vlc-zoom
+# Tools to install via Ninite
 $apps = @(
     # Browsers
     "brave",
@@ -301,5 +297,6 @@ Invoke-WebRequest -Uri $niniteUrl -OutFile $niniteInstaller
 Start-Process -FilePath $niniteInstaller -Wait
 
 # ---- INSTALLATION COMPLETE ----
-Write-Output "Configuration de Windows 10 terminee avec succes."
-Write-Output "Veuillez redemarrer votre machine pour appliquer les changements."
+
+Write-Output "Windows 10 configuration completed successfully."
+Write-Output "Please restart your machine to apply the changes."
