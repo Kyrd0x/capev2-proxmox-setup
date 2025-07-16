@@ -209,28 +209,26 @@ Write-Output "Installing Pillow & pywintrace & pywin32 ..."
 & $pythonExe -m pip install pywintrace
 & $pythonExe -m pip install pywin32
 
- 1. List of animals for discrete random name
-
 # 5. --- Setup agent
 
-#  1. List of animals for discrete random name
+#  5.1. List of animals for discrete random name
 $animals = @(
     "panda", "koala", "tiger", "eagle", "falcon", "otter", "lynx", "panther", "gecko", "wolf",
     "fox", "rabbit", "bear", "orca", "shark", "bat", "owl", "boar", "seal", "lizard"
 )
 
-# 2. Generate a random animal name and create a filename
+# 5.2. Generate a random animal name and create a filename
 $randomAnimal = Get-Random -InputObject $animals
 $filename = "$randomAnimal.pyw"
 $downloadFolder = Join-Path $env:USERPROFILE "Downloads"
 $fullPath = Join-Path $downloadFolder $filename
 
-# 3. Download agent.py file from GitHub (raw version)
+# 5.3. Download agent.py file from GitHub (raw version)
 $rawUrl = "https://raw.githubusercontent.com/kevoreilly/CAPEv2/master/agent/agent.py"
 Invoke-WebRequest -Uri $rawUrl -OutFile $fullPath
 Write-Output "File downloaded: $fullPath"
 
-# 4. Create scheduled task
+# 5.4. Create scheduled task
 $taskName = "Updater_" + $randomAnimal  # nom discret
 $action = New-ScheduledTaskAction -Execute "pythonw.exe" -Argument "`"$fullPath`""
 $trigger = New-ScheduledTaskTrigger -AtLogOn
