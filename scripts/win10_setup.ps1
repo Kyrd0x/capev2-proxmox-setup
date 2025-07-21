@@ -161,6 +161,15 @@ Remove-Item -Path $config_fullPath, $sysmonZipPath, $sysmonExtractPath -Recurse 
 
 # === WINGET INSTALLATION (if needed) ===
 
+# Check if Nuget provider is installed
+if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
+    Write-Output "NuGet provider is not installed. Installing NuGet provider..."
+    Install-PackageProvider -Name NuGet -Force
+    Write-Output "NuGet provider has been successfully installed."
+} else {
+    Write-Output "NuGet provider is already installed. Skipping step."
+}
+
 # Check if winget is installed
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     Write-Output "Winget is not installed. Installing via winget-install.ps1..."
@@ -196,6 +205,7 @@ if (Test-Path $pythonExe) {
     Write-Output "Paths added to PATH for this session: $pythonPath"
 } else {
     Write-Error "Python installation failed or path is incorrect."
+    exit 1
 }
 
 # 3. Update pip
