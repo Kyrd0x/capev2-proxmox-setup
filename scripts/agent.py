@@ -1,6 +1,7 @@
 # Copyright (C) 2010-2019 Cuckoo Foundation.
 # This file is part of Cuckoo Sandbox - http://www.cuckoosandbox.org
 # See the file 'docs/LICENSE' for copying permission.
+# Version from 23.05.2025
 
 import argparse
 import base64
