@@ -291,7 +291,45 @@ $apps = @(
     "vlc",
     "zoom",
     "teamviewer15",
-    "dropbox"
+    "dropbox",
+    # .NET Runtimes
+    ".net4.8.1",
+    ".net8",
+    ".net9",
+    ".neta8",
+    ".neta9",
+    ".netx8",
+    ".netx9",
+    # Java Runtimes
+    "adoptjava8",
+    "adoptjavax11",
+    "adoptjavax17",
+    "adoptjavax21",
+    "adoptjavax8",
+    "adoptjdk8",
+    "adoptjdkx11",
+    "adoptjdkx17",
+    "adoptjdkx21",
+    "adoptjdkx8",
+    "correttojdk8",
+    "correttojdkx11",
+    "correttojdkx17",
+    "correttojdkx21",
+    "correttojdkx8",
+    # VC++ Redistributables
+    "vcredist05",
+    "vcredist08",
+    "vcredist10",
+    "vcredist12",
+    "vcredist13",
+    "vcredist15",
+    "vcredistarm15",
+    "vcredistx05",
+    "vcredistx08",
+    "vcredistx10",
+    "vcredistx12",
+    "vcredistx13",
+    "vcredistx15"
 )
 
 # Génération de l'URL Ninite à partir de la liste
