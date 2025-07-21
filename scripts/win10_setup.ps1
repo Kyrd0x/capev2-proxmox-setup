@@ -203,21 +203,21 @@ if (Test-Path $pythonExe) {
 
     # Add Python to PATH for current session
     Write-Output "Paths added to PATH for this session: $pythonPath"
+    
+    # 3. Update pip
+    Write-Output "Updating pip..."
+    & $pythonExe -m ensurepip --upgrade
+    & $pythonExe -m pip install --upgrade pip
+    
+    # 4. Install modules
+    Write-Output "Installing Pillow & pywintrace & pywin32 ..."
+    & $pythonExe -m pip install Pillow==9.5.0
+    & $pythonExe -m pip install pywintrace
+    & $pythonExe -m pip install pywin32
 } else {
     Write-Error "Python installation failed or path is incorrect."
-    exit 1
+    Write-Error "Skipping modules install."
 }
-
-# 3. Update pip
-Write-Output "Updating pip..."
-& $pythonExe -m ensurepip --upgrade
-& $pythonExe -m pip install --upgrade pip
-
-# 4. Install modules
-Write-Output "Installing Pillow & pywintrace & pywin32 ..."
-& $pythonExe -m pip install Pillow==9.5.0
-& $pythonExe -m pip install pywintrace
-& $pythonExe -m pip install pywin32
 
 # 5. --- Setup agent
 
