@@ -1,17 +1,27 @@
 Dans ```web/templates/submision/index.html```
 
-avoir dans le ```<script>```
+In the ```<script>``` section  
 ```js
-$('.nav-tabs a').on('show.bs.tab', function (event) {
-        const defaultMachine = $(event.target).data('default-machine');
-        if (defaultMachine) {
-            $('#form_machine').val(defaultMachine);
-        }
-    //...
+$(document).ready( function() {
+    // URL is default
+    $('.nav-tabs a[href="#url"]').tab('show');
+
+    // ....
+
+    $('.nav-tabs a').on('show.bs.tab', function (event) {
+            const defaultMachine = $(event.target).data('default-machine');
+            if (defaultMachine) {
+                $('#form_machine').val(defaultMachine);
+            }
+        //...
+    });
+
+    // ......
 });
 ```
 
-Et dans le select du type de submit, avec ```data-default-machine``` le nom de la VM
+
+And in the type select of the submit, with ```data-default-machine``` being the VM name.  
 
 ```html
 <ul class="nav nav-tabs">
@@ -32,4 +42,22 @@ Et dans le select du type de submit, avec ```data-default-machine``` le nom de l
         <li class="nav-item"><a class="nav-link" href="#static" data-toggle="tab"><span class="fa fa-tasks"></span> Static</a></li>
     {% endif %}
 </ul>
+```
+
+Then, in the machine selection form, replace with the code below to select by default the machine whose name contains url.  
+This will be overwritten when a type is selected.  
+
+```html
+<div class="form-group">
+    <label for="form_machine">Machine (choisir : URL vs FICHIER)</label>
+    <select class="form-control" id="form_machine" name="machine">
+        {% for id, label in machines %}
+            {% if "url" in id %}
+                <option value="{{ id }}" selected>{{ label }}</option>
+            {% else %}
+                <option value="{{ id }}">{{ label }}</option>
+            {% endif %}
+        {% endfor %}
+    </select>
+</div>
 ```
