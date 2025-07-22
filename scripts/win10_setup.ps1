@@ -161,36 +161,26 @@ Remove-Item -Path $config_fullPath, $sysmonZipPath, $sysmonExtractPath -Recurse 
 
 # === WINGET INSTALLATION (if needed) ===
 
-if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-    Write-Output "Winget not found. Installing..."
-
-    $temp = "$env:TEMP\winget"
-    $url = "https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
-    $file = "$temp\AppInstaller.msixbundle"
-
-    New-Item -ItemType Directory -Path $temp -Force | Out-Null
-    Invoke-WebRequest -Uri $url -OutFile $file -UseBasicParsing
-
-    try {
-        Add-AppxPackage -Path $file -ErrorAction Stop
-        Start-Sleep -Seconds 3
-
-        if (Get-Command winget -ErrorAction SilentlyContinue) {
-            Write-Host "Winget installed successfully:"
-            winget --version
-        } else {
-            throw "Winget not detected after installation."
-        }
-    } catch {
-        Write-Error "Winget installation failed: $_"
-        exit 1
-    } finally {
-        Remove-Item -Recurse -Force $temp
-    }
-
-    Write-Output "Winget installation complete."
+# Check if Nuget provider is installed
+if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
+    Write-Output "NuGet provider is not installed. Installing NuGet provider..."
+    Install-PackageProvider -Name NuGet -Force
+    Write-Output "NuGet provider has been successfully installed."
 } else {
-    Write-Output "Winget already installed. Skipping."
+    Write-Output "NuGet provider is already installed. Skipping step."
+}
+
+# Check if winget is installed
+if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+    Write-Output "Winget is not installed. Installing via winget-install.ps1..."
+
+    # https://github.com/asheroto/winget-install
+    Install-Script winget-install -Force
+    winget-install -Force
+
+    Write-Output "Winget has been successfully installed via external script."
+} else {
+    Write-Output "Winget is already installed. Skipping step."
 }
 
 # =============================== PYTHON & AGENT INSTALLATION ================================
