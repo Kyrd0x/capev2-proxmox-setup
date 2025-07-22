@@ -291,7 +291,6 @@ $apps = @(
     "vlc",
     "zoom",
     "teamviewer15",
-    "dropbox",
     # .NET Runtimes
     ".net4.8.1",
     ".net8",
