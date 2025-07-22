@@ -282,7 +282,6 @@ $apps = @(
     "chrome",
     "edge",
     "firefox",
-    "operaChromium",
     # Utilities
     "notepadplusplus",
     "filezilla",
