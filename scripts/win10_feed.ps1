@@ -89,6 +89,9 @@ function Generate-Documents {
         # Create-WordFile "$folder\report_$(Get-Random -Minimum 100 -Maximum 999).docx"
         Create-TextFile "$folder\notes_$(Get-Random -Minimum 1000 -Maximum 9999).txt"
     }
+    Create-TextFile "$BasePath\midnight_$(Get-Random -Minimum 1000 -Maximum 9999).txt"
+    Create-TextFile "$BasePath\test_$(Get-Random -Minimum 1000 -Maximum 9999).txt"
+    Create-TextFile "$BasePath\temp_$(Get-Random -Minimum 1000 -Maximum 9999).txt"
 }
 
 # -----------------------------
