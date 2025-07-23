@@ -1,11 +1,16 @@
 Dans ```web/templates/submision/index.html```
 
-In the ```<script>``` section  
-```js
-$(document).ready( function() {
-    // URL is default
-    $('.nav-tabs a[href="#url"]').tab('show');
+In the ```<script>``` section add an auto click section and a default value for the Machine selector.  
 
+```js
+// URL is default
+window.addEventListener('DOMContentLoaded', function () {
+    setTimeout(function () {
+        document.querySelector('a.nav-link[href="#url"]').click();
+    }, 0);
+});
+
+$(document).ready( function() {
     // ....
 
     $('.nav-tabs a').on('show.bs.tab', function (event) {
