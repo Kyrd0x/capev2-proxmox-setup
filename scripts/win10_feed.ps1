@@ -116,7 +116,7 @@ function Simulate-Trash {
 function Simulate-RecentFiles {
     param ($DocsPath, $RecentPath)
     $shell = New-Object -ComObject WScript.Shell
-    $files = Get-ChildItem -Path $DocsPath -Recurse -Filter *.docx
+    $files = Get-ChildItem -Path $DocsPath -Recurse -Include *.docx,*.txt -File
     $selected = $files | Get-Random -Count ([Math]::Min(3, $files.Count))
     foreach ($file in $selected) {
         $lnk = $shell.CreateShortcut("$RecentPath\$($file.BaseName).lnk")
@@ -148,6 +148,7 @@ function Simulate-BrowserData {
 function Run-Simulation {
     $user = $env:USERPROFILE
     $paths = @{
+        Desktop = "$user\Desktop"
         Documents = "$user\Documents"
         Pictures = "$user\Pictures"
         Downloads = "$user\Downloads"
@@ -163,6 +164,8 @@ function Run-Simulation {
 
     Generate-Documents $paths.Documents
     Download-RandomImages $paths.Pictures
+    Download-RandomImages $paths.Desktop
+    Generate-Documents $paths.Desktop
     Set-RandomWallpaper $paths.Pictures
     Create-Downloads $paths.Downloads
     Simulate-Trash $paths.Trash
