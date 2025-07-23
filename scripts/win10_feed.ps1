@@ -86,8 +86,8 @@ function Generate-Documents {
     foreach ($proj in $projects) {
         $folder = Join-Path $BasePath $proj
         Ensure-Folder $folder
-        Create-WordFile "$folder\report_$(Get-Random 100 999).docx"
-        Create-TextFile "$folder\notes_$(Get-Random 1000 9999).txt"
+        Create-WordFile "$folder\report_$(Get-Random -Minimum 100 -Maximum 999).docx"
+        Create-TextFile "$folder\notes_$(Get-Random -Minimum 1000 -Maximum 9999).txt"
     }
 }
 
