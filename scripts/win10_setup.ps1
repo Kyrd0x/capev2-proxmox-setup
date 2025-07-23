@@ -1,9 +1,12 @@
-# Prerequis :
-# Permissions admin (a tester)
-# Acces internet (a tester)
 # Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
 
-# todo: enable machinery as argument, default kvm
+# todo :
+# Admin perms to check
+# Internet access to check
+# enable machinery as argument, default kvm
+
+# RDP
+# Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections' -Value 0
 
 # VMWare :
 # https://web.archive.org/web/20200222145558/http://vknowledge.net/2014/04/17/how-to-fake-a-vms-guest-os-cpuid/
