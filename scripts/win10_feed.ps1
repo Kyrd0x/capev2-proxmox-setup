@@ -116,12 +116,16 @@ function Simulate-Trash {
 function Simulate-RecentFiles {
     param ($DocsPath, $RecentPath)
     $shell = New-Object -ComObject WScript.Shell
-    $files = Get-ChildItem -Path $DocsPath -Recurse -Include *.docx,*.txt -File
-    $selected = $files | Get-Random -Count ([Math]::Min(3, $files.Count))
-    foreach ($file in $selected) {
-        $lnk = $shell.CreateShortcut("$RecentPath\$($file.BaseName).lnk")
-        $lnk.TargetPath = $file.FullName
-        $lnk.Save()
+    $files = Get-ChildItem -Path $DocsPath -Recurse -Filter *.docx
+    if ($files.Count -ne 0) { 
+        $selected = $files | Get-Random -Count ([Math]::Min(3, $files.Count))
+        foreach ($file in $selected) {
+            $lnk = $shell.CreateShortcut("$RecentPath\$($file.BaseName).lnk")
+            $lnk.TargetPath = $file.FullName
+            $lnk.Save()
+        }
+    } else {
+        Write-Host "No documents found in $DocsPath to simulate recent files."
     }
 }
 
