@@ -14,7 +14,7 @@ This is ongoing stuff, personnal notes
 
 ## Setting up Ubuntu 24 Host
 
-Let's create the Ubuntu LXC (2 CPUs / 4GB RAM / 24GB SSD), on 10.12.0.70.
+Let's create the Ubuntu LXC (2 CPUs / 4GB RAM / 128GB SSD), on 10.12.0.70.
 
 Create a ```cape``` user use sudo permissions
 
